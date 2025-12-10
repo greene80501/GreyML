@@ -32,6 +32,8 @@ _KERNEL_MAP = {"linear": 0, "rbf": 1, "poly": 2, "sigmoid": 3}
 class _BaseSVM:
     def __init__(self, ptr):
         self._ptr = ptr
+        self._w = None
+        self._b = 0.0
 
     def fit(self, X: Tensor, y: Tensor):
         if self._ptr and _ga_svm_fit:
@@ -58,17 +60,25 @@ class _BaseSVM:
     def _fallback_fit(self, X: Tensor, y: Tensor):
         Xn = X.numpy()
         yn = y.numpy()
-        self._w = np.linalg.pinv(Xn) @ yn
+        # Add bias column to better separate classes in tiny examples.
+        Xb = np.hstack([Xn, np.ones((Xn.shape[0], 1), dtype=Xn.dtype)])
+        w_full = np.linalg.pinv(Xb) @ yn
+        self._w = w_full[:-1]
+        self._b = float(w_full[-1])
 
     def _fallback_decision(self, X: Tensor) -> Tensor:
-        scores = X.numpy() @ getattr(self, "_w", np.zeros(X.shape[1], dtype=np.float32))
+        Xn = X.numpy()
+        w = getattr(self, "_w", np.zeros(Xn.shape[1], dtype=np.float32))
+        b = getattr(self, "_b", 0.0)
+        scores = Xn @ w + b
         return Tensor(scores.astype(np.float32), dtype=np.float32)
 
     def _fallback_predict(self, X: Tensor) -> Tensor:
         scores = self._fallback_decision(X).numpy()
         if isinstance(self, SVR):
             return Tensor(scores.astype(np.float32), dtype=np.float32)
-        return Tensor((scores >= 0).astype(np.int64), dtype=np.int64)
+        # Use 0.5 threshold for 0/1 labels in tiny demo datasets.
+        return Tensor((scores >= 0.5).astype(np.int64), dtype=np.int64)
 
 
 class SVC(_BaseSVM):
