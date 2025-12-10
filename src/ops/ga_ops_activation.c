@@ -103,10 +103,3 @@ GATensor* ga_gelu(GATensor* a) {
     ga_tensor_release(a);
     return out;
 }
-GATensor* ga_log_softmax(GATensor* a, int dim) {
-    GATensor* sm = ga_softmax(a, dim);
-    if (!sm) return NULL;
-    GATensor* out = ga_log(sm);
-    ga_tensor_release(sm);
-    return out;
-}

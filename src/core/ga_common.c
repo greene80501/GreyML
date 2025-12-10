@@ -12,17 +12,17 @@
 GAStatus ga_errno = GA_SUCCESS;
 
 static const char* ga_status_messages[] = {
-    [GA_SUCCESS] = "Success",
-    [GA_ERR_ALLOC_FAILED] = "Memory allocation failed",
-    [GA_ERR_INVALID_SHAPE] = "Invalid tensor shape or dimensions",
-    [GA_ERR_INVALID_DTYPE] = "Invalid data type",
-    [GA_ERR_OUT_OF_BOUNDS] = "Index out of bounds",
-    [GA_ERR_NOT_IMPLEMENTED] = "Feature not yet implemented",
-    [GA_ERR_DIV_BY_ZERO] = "Division by zero",
+    "Success",                            // 0
+    "Memory allocation failed",           // -1
+    "Invalid tensor shape or dimensions", // -2
+    "Invalid data type",                  // -3
+    "Index out of bounds",                // -4
+    "Feature not yet implemented",        // -5
+    "Division by zero",                   // -6
 };
 
 const char* ga_status_string(GAStatus status) {
-    if (status >= 0 || status < GA_ERR_DIV_BY_ZERO) {
+    if (status > GA_SUCCESS || status < GA_ERR_DIV_BY_ZERO) {
         return "Unknown error";
     }
     return ga_status_messages[-status];
