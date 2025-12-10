@@ -15,12 +15,14 @@ import os
 # =============================================================================
 
 def load_library():
-    """Load greyarea.dll from various search paths."""
+    """Load greyarea.dll from repo build outputs first, then fall back."""
     dll_name = "greyarea.dll"
 
+    repo_root = Path(__file__).resolve().parents[2]
     search_paths = [
-        Path(__file__).parent / dll_name,
-        Path(__file__).parent.parent / "build" / "release" / dll_name,
+        repo_root / "build" / "Release" / dll_name,  # CMake multi-config
+        repo_root / "build" / "release" / dll_name,  # lowercase variant
+        Path(__file__).parent / dll_name,             # packaged copy (fallback)
         Path(sys.prefix) / "Library" / "bin" / dll_name,
         Path(sys.prefix) / "DLLs" / dll_name,
     ]
