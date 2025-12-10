@@ -1,0 +1,6 @@
+C:/Users/green/grey_area_low_level_AI/kimi_k2/build/release/CMakeFiles/greyarea.dir
+C:/Users/green/grey_area_low_level_AI/kimi_k2/build/release/CMakeFiles/edit_cache.dir
+C:/Users/green/grey_area_low_level_AI/kimi_k2/build/release/CMakeFiles/rebuild_cache.dir
+C:/Users/green/grey_area_low_level_AI/kimi_k2/build/release/CMakeFiles/list_install_components.dir
+C:/Users/green/grey_area_low_level_AI/kimi_k2/build/release/CMakeFiles/install.dir
+C:/Users/green/grey_area_low_level_AI/kimi_k2/build/release/CMakeFiles/install/local.dir
