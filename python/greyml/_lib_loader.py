@@ -9,19 +9,22 @@ from pathlib import Path
 
 def load_library():
     dll_name = "greyarea.dll"
-    
-    # Search paths
+
+    # Prefer freshly built artifacts first (CI/build tree), then fall back.
+    repo_root = Path(__file__).resolve().parents[2]
     search_paths = [
+        repo_root / "build" / "Release" / dll_name,
+        repo_root / "build" / "release" / dll_name,
         Path(__file__).parent / dll_name,
         Path(sys.prefix) / "Library" / "bin" / dll_name,
         Path(sys.prefix) / "DLLs" / dll_name,
     ]
-    
-    # Add PATH
+
+    # Add PATH entries
     for path in os.environ.get("PATH", "").split(os.pathsep):
         if path:
             search_paths.append(Path(path) / dll_name)
-    
+
     for path in search_paths:
         if path.exists():
             try:
