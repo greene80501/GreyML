@@ -210,7 +210,3 @@ GATensor* ga_max(GATensor* a, int dim, bool keepdim) {
     ga_tensor_release(a);
     return out;
 }
-
-GATensor* ga_flatten(GATensor* a) {
-    return ga_tensor_flatten(a, 0, a->ndim - 1);
-}
