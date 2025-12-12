@@ -14,6 +14,7 @@ setup(
     packages=find_packages(where="python"),
     package_dir={"": "python"},
     include_package_data=True,
+    package_data={"greyml": ["greyarea.dll"]},
     python_requires=">=3.10",
     install_requires=["numpy>=1.24"],
 )

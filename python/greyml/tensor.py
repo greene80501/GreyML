@@ -1304,7 +1304,9 @@ def huber_loss(pred: Tensor, target: Tensor, delta: float = 1.0, reduction: str 
 def cross_entropy(logits: Tensor, target: Tensor, reduction: str = "mean") -> Tensor:
     # Simple cross-entropy using softmax + NLL for one-hot/label targets
     target_arr = np.array(target.numpy(), copy=True)
-    probs = logits.softmax(dim=-1)
+    # Add epsilon to avoid log(0) / division instabilities
+    eps = 1e-7
+    probs = logits.softmax(dim=-1) + eps
     if target_arr.ndim == 1:
         # target contains class indices
         one_hot = np.zeros(probs.shape, dtype=probs.dtype)
