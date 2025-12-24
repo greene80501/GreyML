@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static double ga_svm_kernel_eval(const double* x, const double* y, int len, const GASVM* svm) {
+static double ga_svm_kernel_eval_raw(const double* x, const double* y, int len, const GASVM* svm) {
     double gamma = svm->gamma > 0 ? svm->gamma : 1.0 / (double)len;
     switch (svm->kernel) {
         case SVM_KERNEL_RBF: return ga_svm_kernel_rbf(x, y, len, gamma);
@@ -24,12 +24,29 @@ static double ga_svm_kernel_eval(const double* x, const double* y, int len, cons
     }
 }
 
+static double ga_svm_kernel_eval(const float* x, const float* y, int len, const GASVM* svm) {
+    // Convert float to double for the kernel eval
+    double* xd = (double*)malloc(len * sizeof(double));
+    double* yd = (double*)malloc(len * sizeof(double));
+    if (!xd || !yd) {
+        if (xd) free(xd);
+        if (yd) free(yd);
+        return 0.0;
+    }
+    for(int i=0; i<len; i++) xd[i] = (double)x[i];
+    for(int i=0; i<len; i++) yd[i] = (double)y[i];
+    double res = ga_svm_kernel_eval_raw(xd, yd, len, svm);
+    free(xd);
+    free(yd);
+    return res;
+}
+
 static void ga_svm_build_kernel(const double* X, int64_t n, int64_t d, const GASVM* svm, double* K) {
     for (int64_t i = 0; i < n; i++) {
         const double* xi = X + i * d;
         for (int64_t j = 0; j <= i; j++) {
             const double* xj = X + j * d;
-            double v = ga_svm_kernel_eval(xi, xj, (int)d, svm);
+            double v = ga_svm_kernel_eval_raw(xi, xj, (int)d, svm);
             K[i * n + j] = v;
             K[j * n + i] = v;
         }

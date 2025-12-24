@@ -5,6 +5,8 @@
  */
 
 #include "greyarea/ga_simd.h"
+
+#ifdef _WIN32
 #include <intrin.h>
 
 bool ga_simd_has_avx2(void) {
@@ -31,3 +33,33 @@ bool ga_simd_has_avx512(void) {
     }
     return false;
 }
+
+#else
+// Linux / GCC / Clang implementation
+#include <cpuid.h>
+
+bool ga_simd_has_avx2(void) {
+#if defined(__GNUC__) || defined(__clang__)
+    return __builtin_cpu_supports("avx2");
+#else
+    unsigned int eax, ebx, ecx, edx;
+    if (__get_cpuid(7, &eax, &ebx, &ecx, &edx)) {
+        return (ebx & (1 << 5)) != 0;
+    }
+    return false;
+#endif
+}
+
+bool ga_simd_has_avx512(void) {
+#if defined(__GNUC__) || defined(__clang__)
+    return __builtin_cpu_supports("avx512f");
+#else
+    unsigned int eax, ebx, ecx, edx;
+    if (__get_cpuid(7, &eax, &ebx, &ecx, &edx)) {
+        return (ebx & (1 << 16)) != 0;
+    }
+    return false;
+#endif
+}
+
+#endif

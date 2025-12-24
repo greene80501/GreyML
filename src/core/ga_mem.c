@@ -4,17 +4,32 @@
  * Foundational runtime utilities including error handling, memory management, random utilities, and tensor lifecycle helpers.
  */
 
+#ifdef _WIN32
 #include <windows.h>
+#else
 #include <stdlib.h>
+#endif
 #include <string.h>
 #include "greyarea/ga_mem.h"
 
 void* ga_aligned_alloc(size_t size, size_t alignment) {
+#ifdef _WIN32
     return _aligned_malloc(size, alignment);
+#else
+    void* ptr = NULL;
+    if (posix_memalign(&ptr, alignment, size) != 0) {
+        return NULL;
+    }
+    return ptr;
+#endif
 }
 
 void ga_aligned_free(void* ptr) {
+#ifdef _WIN32
     _aligned_free(ptr);
+#else
+    free(ptr);
+#endif
 }
 
 GAArena* ga_arena_create(size_t capacity) {

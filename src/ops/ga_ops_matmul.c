@@ -7,6 +7,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <assert.h>  // ADD THIS LINE
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 #include "greyarea/ga_ops.h"
 #include "greyarea/ga_tensor.h"
 #include "greyarea/ga_autograd.h"
@@ -53,14 +56,33 @@ GATensor* ga_matmul(GATensor* a, GATensor* b) {
     float* B = (float*)b->data;
     float* C = (float*)out->data;
     
-    // Naive O(n³) implementation
-    for (int64_t i = 0; i < m; i++) {
-        for (int64_t j = 0; j < n; j++) {
-            float sum = 0.0f;
-            for (int64_t p = 0; p < k; p++) {
-                sum += A[i * k + p] * B[p * n + j];
+    // Tiled O(n³) implementation
+    const int64_t BLOCK_SIZE = 32;
+
+    // Initialize output to zero
+    // We can't use memset easily because of float, but loop is fine or ga_tensor_fill (not exposed here easily)
+    for (int64_t i = 0; i < m * n; i++) C[i] = 0.0f;
+
+    #ifdef _OPENMP
+    #pragma omp parallel for collapse(2)
+    #endif
+    for (int64_t i = 0; i < m; i += BLOCK_SIZE) {
+        for (int64_t j = 0; j < n; j += BLOCK_SIZE) {
+            for (int64_t p = 0; p < k; p += BLOCK_SIZE) {
+                // Bounds
+                int64_t i_max = (i + BLOCK_SIZE > m) ? m : i + BLOCK_SIZE;
+                int64_t j_max = (j + BLOCK_SIZE > n) ? n : j + BLOCK_SIZE;
+                int64_t p_max = (p + BLOCK_SIZE > k) ? k : p + BLOCK_SIZE;
+
+                for (int64_t ii = i; ii < i_max; ii++) {
+                    for (int64_t pp = p; pp < p_max; pp++) {
+                        float a_val = A[ii * k + pp];
+                        for (int64_t jj = j; jj < j_max; jj++) {
+                             C[ii * n + jj] += a_val * B[pp * n + jj];
+                        }
+                    }
+                }
             }
-            C[i * n + j] = sum;
         }
     }
     if (ga_is_grad_enabled() && (a->requires_grad || b->requires_grad)) {
@@ -120,14 +142,32 @@ GATensor* ga_bmm(GATensor* a, GATensor* b) {
     float* A = (float*)a->data;
     float* B = (float*)b->data;
     float* C = (float*)out->data;
+    const int64_t BLOCK_SIZE = 32;
+    // Zero out C
+    for (int64_t i = 0; i < batch * m * n; i++) C[i] = 0.0f;
+
+    #ifdef _OPENMP
+    #pragma omp parallel for collapse(3)
+    #endif
     for (int64_t bch = 0; bch < batch; bch++) {
-        for (int64_t i = 0; i < m; i++) {
-            for (int64_t j = 0; j < n; j++) {
-                float sum = 0.0f;
-                for (int64_t p = 0; p < k; p++) {
-                    sum += A[bch * m * k + i * k + p] * B[bch * k * n + p * n + j];
+        for (int64_t i = 0; i < m; i += BLOCK_SIZE) {
+            for (int64_t j = 0; j < n; j += BLOCK_SIZE) {
+                // For each block
+                int64_t i_max = (i + BLOCK_SIZE > m) ? m : i + BLOCK_SIZE;
+                int64_t j_max = (j + BLOCK_SIZE > n) ? n : j + BLOCK_SIZE;
+
+                for (int64_t p = 0; p < k; p += BLOCK_SIZE) {
+                    int64_t p_max = (p + BLOCK_SIZE > k) ? k : p + BLOCK_SIZE;
+
+                    for (int64_t ii = i; ii < i_max; ii++) {
+                        for (int64_t pp = p; pp < p_max; pp++) {
+                             float a_val = A[bch * m * k + ii * k + pp];
+                             for (int64_t jj = j; jj < j_max; jj++) {
+                                 C[bch * m * n + ii * n + jj] += a_val * B[bch * k * n + pp * n + jj];
+                             }
+                        }
+                    }
                 }
-                C[bch * m * n + i * n + j] = sum;
             }
         }
     }

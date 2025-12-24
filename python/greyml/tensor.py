@@ -12,11 +12,17 @@ import numpy as np
 
 # Load the C library
 def _load_library():
-    dll_name = "greyarea.dll"
+    if os.name == "nt":
+        dll_name = "greyarea.dll"
+    else:
+        dll_name = "libgreyarea.so"
+
     search_paths = [
         Path(__file__).parent / dll_name,
         Path(sys.prefix) / "Library" / "bin" / dll_name,
         Path(sys.prefix) / "DLLs" / dll_name,
+        Path(sys.prefix) / "lib" / dll_name,
+        Path.cwd() / "build" / dll_name,
     ]
 
     # Also search PATH

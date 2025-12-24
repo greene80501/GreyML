@@ -35,7 +35,7 @@ if(WIN32)
 endif()
 
 # Options
-option(GA_USE_OPENMP "Enable OpenMP parallelization" OFF)
+option(GA_USE_OPENMP "Enable OpenMP parallelization" ON)
 option(GA_USE_BLAS "Use OpenBLAS for matrix operations" OFF)
 option(GA_BUILD_TESTS "Build test suite" ON)
 option(GA_BUILD_EXAMPLES "Build example programs" ON)
@@ -85,6 +85,11 @@ set(ALL_SRCS
 
 # Create library
 add_library(greyarea SHARED ${ALL_SRCS})
+
+if(GA_USE_OPENMP)
+    find_package(OpenMP REQUIRED)
+    target_link_libraries(greyarea PUBLIC OpenMP::OpenMP_C)
+endif()
 
 # Set include directories
 target_include_directories(greyarea PUBLIC 
