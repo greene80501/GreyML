@@ -1,0 +1,10 @@
+# GreyML config: pyproject.toml - packaging/build settings.
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "greyml"
+version = "0.0.0-placeholder"
+description = "Local editable stub; use repository root pyproject.toml for real packaging."
+authors = [{name = "GreyArea Labs"}]
