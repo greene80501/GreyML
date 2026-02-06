@@ -1,0 +1,55 @@
+# GreyML config: pyproject.toml - packaging/build settings.
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "greyml"
+version = "0.1.0"
+description = "GreyArea Labs AI Library (Python bindings)"
+readme = "README.md"
+authors = [{name = "GreyArea Labs"}]
+maintainers = [{name = "GreyArea Labs"}]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+keywords = [
+    "machine learning",
+    "deep learning",
+    "autograd",
+    "tensor",
+    "neural networks",
+    "c17",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: C",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = ["numpy>=1.24"]
+
+[project.urls]
+Homepage = "https://github.com/greene80501/GreyML"
+Repository = "https://github.com/greene80501/GreyML"
+Issues = "https://github.com/greene80501/GreyML/issues"
+
+[tool.setuptools]
+package-dir = {"" = "python"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["python"]
+
+[tool.setuptools.package-data]
+greyml = ["*.dll"]

@@ -1,0 +1,7 @@
+include pyproject.toml
+include setup.py
+include setup.cfg
+include README.md
+include LICENSE
+recursive-include python/greyml *.dll
+prune python/greyml.egg-info
